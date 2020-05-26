@@ -115,7 +115,9 @@ anychart.core.ui.LabelsFactory = function(opt_skipDefaultThemes) {
    *
    * @type {anychart.core.ui.InternalLabelsFormatter}
    */
-  this.lengthFormatter = new anychart.core.ui.InternalLabelsFormatter();
+  this.lengthFormatter = new anychart.core.ui.InternalLabelsFormatter(
+      anychart.core.ui.InternalLabelsFormatter.formatters.getLengthFormatter(this.getOption('maxLength'),'...')
+  );
 
   /**
    * Invalidation hook for 'maxLength' property.
@@ -2508,9 +2510,13 @@ anychart.core.ui.LabelsFactory.Label.prototype.draw = function() {
 
   if (this.checkInvalidationState(anychart.ConsistencyState.CONTAINER)) {
     if (enabled) {
-
-      if ((!this.factory_.enabled() || (goog.isDef(this.enabled()) && !this.enabled())) && this.factory_.getDomElement()) {
-        if (!this.container()) this.container(factory.getDomElement());
+      var isFactoryDisabled = !this.factory_.enabled();
+      var isCurrentLabelEnabled = this.enabled();
+      if ((isFactoryDisabled || (goog.isDef(isCurrentLabelEnabled) && !isCurrentLabelEnabled)) && this.factory_.getDomElement()) {
+        if (!this.container()) {
+          debugger
+          this.container(factory.getDomElement());
+        }
         if (!this.container().parent()) {
           this.container().parent(/** @type {acgraph.vector.ILayer} */(factory.container()));
         }

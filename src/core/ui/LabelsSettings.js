@@ -101,7 +101,9 @@ anychart.core.ui.LabelsSettings = function(opt_skipDefaultThemes) {
    *
    * @type {anychart.core.ui.InternalLabelsFormatter}
    */
-  this.lengthFormatter = new anychart.core.ui.InternalLabelsFormatter();
+  this.lengthFormatter = new anychart.core.ui.InternalLabelsFormatter(
+      anychart.core.ui.InternalLabelsFormatter.formatters.getLengthFormatter(this.getOption('maxLength'),'...')
+  );
 
   /**
    * Invalidation hook for 'maxLength' property.
