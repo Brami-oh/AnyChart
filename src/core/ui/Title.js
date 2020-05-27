@@ -250,24 +250,6 @@ anychart.core.ui.Title.prototype.SIMPLE_PROPS_DESCRIPTORS = (function() {
   /** @type {!Object.<string, anychart.core.settings.PropertyDescriptor>} */
   var map = {};
 
-  anychart.core.settings.createDescriptor(
-      map,
-      anychart.enums.PropertyHandlerType.SINGLE_ARG,
-      'width',
-      anychart.core.settings.numberOrPercentNormalizer);
-
-  anychart.core.settings.createDescriptor(
-      map,
-      anychart.enums.PropertyHandlerType.SINGLE_ARG,
-      'height',
-      anychart.core.settings.numberOrPercentNormalizer);
-
-  anychart.core.settings.createDescriptor(
-      map,
-      anychart.enums.PropertyHandlerType.SINGLE_ARG,
-      'align',
-      anychart.enums.normalizeAlign);
-
   function orientationNormalizer(val) {
     if (this.isStockPlotTitle_)
       return val == anychart.enums.Orientation.BOTTOM ? val : anychart.enums.Orientation.TOP;
@@ -275,23 +257,15 @@ anychart.core.ui.Title.prototype.SIMPLE_PROPS_DESCRIPTORS = (function() {
       return anychart.enums.normalizeOrientation(val);
   }
 
-  anychart.core.settings.createDescriptor(
-      map,
-      anychart.enums.PropertyHandlerType.SINGLE_ARG,
-      'orientation',
-      orientationNormalizer);
-
-  anychart.core.settings.createDescriptor(
-      map,
-      anychart.enums.PropertyHandlerType.SINGLE_ARG,
-      'rotation',
-      anychart.core.settings.numberNormalizer);
-
-  anychart.core.settings.createDescriptor(
-      map,
-      anychart.enums.PropertyHandlerType.SINGLE_ARG,
-      'text',
-      anychart.core.settings.stringNormalizer);
+  anychart.core.settings.createDescriptors(map, [
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'width', anychart.core.settings.numberOrPercentNormalizer],
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'height', anychart.core.settings.numberOrPercentNormalizer],
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'align', anychart.enums.normalizeAlign],
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'orientation', orientationNormalizer],
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'rotation', anychart.core.settings.numberNormalizer],
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'text', anychart.core.settings.stringNormalizer],
+    [anychart.enums.PropertyHandlerType.SINGLE_ARG, 'maxLength', anychart.core.settings.numberOrNullNormalizer]
+  ]);
 
   return map;
 })();
