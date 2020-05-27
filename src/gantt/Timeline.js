@@ -666,7 +666,6 @@ anychart.ganttModule.TimeLine.prototype.initializeElements_ = function() {
 anychart.ganttModule.TimeLine.prototype.elements = function(opt_value) {
   if (!this.elements_) {
     this.elements_ = new anychart.ganttModule.elements.TimelineElement(this);
-    this.elements_.labels().setParentEventTarget(this.labels());
     this.setupCreated('elements', this.elements_);
     this.elements_.setupStateSettings();
     this.elements_.listenSignals(this.visualElementInvalidated_, this);
@@ -5878,21 +5877,102 @@ anychart.ganttModule.TimeLine.prototype.labelsInvalidated_ = function(event) {
  * @private
  */
 anychart.ganttModule.TimeLine.prototype.drawLabels_ = function() {
-  const labelsContainer = this.labels().container();
-  this.controller.data().suspendSignalsDispatching();//this.controller.data() can be Tree or TreeView.
   this.labels().suspendSignalsDispatching();
   this.labels().clear();
-
-  var normalLabels = this.labels();
-  var elementsLabels = this.elements().labels();
 
   var els = this.initializeElements_();
 
   for (var i = 0; i < els.length; i++) {
     var element = els[i];
-    element.drawLabels(labelsContainer);
+    if (element.getOption('enabled')) {
+      if (!element.shapeManager)
+        element.recreateShapeManager();
+      var tagsData = element.shapeManager.getTagsData();
+      for (var j in tagsData) {
+        if (tagsData.hasOwnProperty(j)) {
+          var tag = tagsData[j];
+          if (tag.isElement) {
+
+            var context = this.createFormatProvider(tag.item, tag.period, tag.periodIndex);
+            tag.label = this.labels().add(context, {
+              'value': {
+                'x': 0,
+                'y': 0
+              }
+            });
+
+            var pointLabels = tag.labelPointSettings;
+            // var typeLabels = tag.labels;
+            var resolutionLabels = tag.labels;
+            var typeLabels = resolutionLabels && resolutionLabels[0] ? resolutionLabels[0] : null; //smth like this.tasks().labels() always here.
+            var elementsLabels = this.elements().labels();
+            var normalLabels = this.labels();
+
+            var pointLabelsEnabled = pointLabels && goog.isDef(pointLabels['enabled']) ? pointLabels['enabled'] : null;
+            var elementsLabelsEnabled = element && goog.isDef(elementsLabels.enabled()) ? elementsLabels.enabled() : null;
+            var typeLabelsEnabled = typeLabels && goog.isDef(typeLabels.enabled()) ? typeLabels.enabled() : null;
+
+            var draw = false;
+            if (goog.isNull(pointLabelsEnabled)) {
+              if (goog.isNull(elementsLabelsEnabled)) {
+                if (goog.isNull(typeLabelsEnabled)) {
+                  draw = normalLabels.enabled();
+                } else {
+                  draw = typeLabelsEnabled;
+                }
+              } else {
+                draw = elementsLabelsEnabled;
+              }
+            } else {
+              draw = pointLabelsEnabled;
+            }
+
+            if (draw) {
+              tag.label.resetSettings();
+              tag.label.enabled(true);
+
+              tag.label.state('labelOwnSettings', tag.label.ownSettings, 0);
+              tag.label.state('pointState', pointLabels, 1);
+
+              var len = resolutionLabels.length;
+              var k, count, stateLabels;
+              for (k = 0; k < len; k++) {
+                stateLabels = resolutionLabels[k];
+                count = 2 + k;
+                tag.label.state('st' + count, stateLabels, count);
   }
 
+              //Second passage provides correct theme settings order
+              for (k = 0; k < len; k++) {
+                stateLabels = resolutionLabels[k];
+                count = 2 + k + len;
+                tag.label.state('st' + count, stateLabels.themeSettings, count);
+              }
+
+              var position = anychart.enums.normalizeAnchor(tag.label.getFinalSettings('position'));
+              var positionProvider = {'value': anychart.utils.getCoordinateByAnchor(tag.bounds, position)};
+              tag.label.positionProvider(positionProvider);
+
+              var values = context.contextValues();
+              values['label'] = {value: tag.label, type: anychart.enums.TokenType.UNKNOWN};
+              context.propagate();
+
+              tag.label.formatProvider(context);
+
+              this.controller.data().suspendSignalsDispatching();//this.controller.data() can be Tree or TreeView.
+              tag.item.meta('label', tag.label);
+              this.controller.data().resumeSignalsDispatching(false);
+            } else {
+              tag.label.enabled(false);
+            }
+            tag.label.draw();
+          }
+        }
+      }
+    }
+  }
+
+  this.labels().resumeSignalsDispatching(true);
   this.labels().draw();
   this.elements().labels().markConsistent(anychart.ConsistencyState.ALL);
 
@@ -5901,8 +5981,6 @@ anychart.ganttModule.TimeLine.prototype.drawLabels_ = function() {
     var el = els[elIndex];
     el.labels().markConsistent(anychart.ConsistencyState.ALL);
   }
-
-  this.controller.data().resumeSignalsDispatching(false);
 };
 
 

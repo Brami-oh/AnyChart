@@ -285,7 +285,6 @@ anychart.ganttModule.elements.TimelineElement.prototype.parent = function(opt_va
       if (goog.isNull(opt_value)) {
         //this.parent_ is not null here.
         this.parent_.unlistenSignals(this.parentInvalidated_, this);
-        this.labels().setParentEventTarget(null);
         this.rendering().parent(null);
         this.edit().parent(null);
         this.tooltip().parent(null);
@@ -296,7 +295,6 @@ anychart.ganttModule.elements.TimelineElement.prototype.parent = function(opt_va
         if (this.parent_)
           this.parent_.unlistenSignals(this.parentInvalidated_, this);
         this.parent_ = opt_value;
-        this.labels().setParentEventTarget(opt_value.labels());
         this.rendering().parent(this.parent_.rendering());
         this.edit().parent(this.parent_.edit());
         this.tooltip().parent(this.parent_.tooltip());
@@ -856,99 +854,7 @@ anychart.ganttModule.elements.TimelineElement.prototype.renderingSettingsInvalid
   this.dispatchSignal(anychart.Signal.NEEDS_REDRAW);
 };
 
-anychart.ganttModule.elements.TimelineElement.prototype.doDraw = function (parentEnabledState) {
-  // var typeLabels = resolutionLabels && resolutionLabels[0] ? resolutionLabels[0] : null; //smth like this.tasks().labels() always here.
-  //
-  //
-  // var pointLabelsEnabled = pointLabels && goog.isDef(pointLabels['enabled']) ? pointLabels['enabled'] : null;
-  // var elementsLabelsEnabled = elementsLabels && goog.isDef(elementsLabels.enabled()) ? elementsLabels.enabled() : null;
-  // var typeLabelsEnabled = typeLabels && goog.isDef(typeLabels.enabled()) ? typeLabels.enabled() : null;
 
-
-var elementEnabledState = this.getOption('enabled');
-var pointDataEnabledState = null;
-
-
-  return goog.isNull(elementEnabledState) ? parentEnabledState : elementEnabledState;
-};
-
-anychart.ganttModule.elements.TimelineElement.prototype.drawLabels = function (container) {
-  const labelsFactory = this.labels().container(container);
-  labelsFactory.suspendSignalsDispatching();
-  labelsFactory.clear();
-
-  var labels = [];
-  var element = this;
-  if (element.getOption('enabled')) {
-    if (!element.shapeManager)
-      element.recreateShapeManager();
-    var tagsData = element.shapeManager.getTagsData();
-    for (var j in tagsData) {
-      if (tagsData.hasOwnProperty(j)) {
-        var tag = tagsData[j];
-        if (tag.isElement) {
-          var context = this.timeline_.createFormatProvider(tag.item, tag.period, tag.periodIndex);
-          var label = labelsFactory.add(context, {
-            'value': {
-              'x': 0,
-              'y': 0
-            }
-          });
-
-          var pointLabels = tag.labelPointSettings;
-          // var typeLabels = tag.labels;
-          var resolutionLabels = tag.labels;
-          var draw = this.doDraw(true);
-          if (draw) {
-            label.resetSettings();
-            label.enabled(true);
-
-            label.state('labelOwnSettings', label.ownSettings, 0);
-            label.state('pointState', pointLabels, 1);
-
-            var len = resolutionLabels.length;
-            var k, count, stateLabels;
-            for (k = 0; k < len; k++) {
-              stateLabels = resolutionLabels[k];
-              count = 2 + k;
-              label.state('st' + count, stateLabels, count);
-            }
-
-            //Second passage provides correct theme settings order
-            for (k = 0; k < len; k++) {
-              stateLabels = resolutionLabels[k];
-              count = 2 + k + len;
-              label.state('st' + count, stateLabels.themeSettings, count);
-            }
-
-            var position = anychart.enums.normalizeAnchor(label.getFinalSettings('position'));
-            var positionProvider = {'value': anychart.utils.getCoordinateByAnchor(tag.bounds, position)};
-            label.positionProvider(positionProvider);
-
-            var values = context.contextValues();
-            values['label'] = {value: label, type: anychart.enums.TokenType.UNKNOWN};
-            context.propagate();
-
-            label.formatProvider(context);
-            tag.item.meta('label', tag.label);
-          } else {
-            label.enabled(false);
-          }
-          labels.push(label);
-          tag.label= label
-        }
-      }
-    }
-  }
-
-  for (var i = 0; i < labels.length; i++) {
-    var label = labels[i];
-
-    label.draw();
-  }
-  this.labels().draw();
-  this.labels().resumeSignalsDispatching(true);
-};
 //endregion
 //region -- Parent States.
 /** @inheritDoc */
