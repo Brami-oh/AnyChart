@@ -1328,6 +1328,7 @@ anychart.core.ui.LabelsFactory.Label = function() {
 
   anychart.core.settings.createDescriptorsMeta(this.descriptorsMeta, [
     ['format', anychart.ConsistencyState.APPEARANCE | anychart.ConsistencyState.BOUNDS | anychart.ConsistencyState.LABELS_FACTORY_CACHE, anychart.Signal.NEEDS_REDRAW | anychart.Signal.BOUNDS_CHANGED],
+    ['maxLength', anychart.ConsistencyState.APPEARANCE | anychart.ConsistencyState.BOUNDS | anychart.ConsistencyState.LABELS_FACTORY_CACHE, anychart.Signal.NEEDS_REDRAW | anychart.Signal.BOUNDS_CHANGED],
     ['positionFormatter', anychart.ConsistencyState.BOUNDS, anychart.Signal.NEEDS_REDRAW | anychart.Signal.BOUNDS_CHANGED],
     ['position', anychart.ConsistencyState.BOUNDS, anychart.Signal.NEEDS_REDRAW | anychart.Signal.BOUNDS_CHANGED],
     ['anchor', anychart.ConsistencyState.BOUNDS, anychart.Signal.NEEDS_REDRAW | anychart.Signal.BOUNDS_CHANGED],
@@ -2833,13 +2834,13 @@ anychart.core.ui.LabelsFactory.Label.prototype.applyInternalTextFormatters = fun
   var maxLength = mergedSettings['maxLength'];
 
   if (goog.isDef(maxLength)) {
-    text = anychart.core.ui.InternalLabelsFormatters.getLengthFormatter(text, maxLength);
+    text = anychart.core.ui.InternalLabelsFormatters.textLengthFormatter(text, maxLength);
   }
   return text;
 };
 
 /**
- * Return text value.
+ * Returns text value need to be displayed.
  *
  * @param {Function|string} formatter Text formatter function.
  * @param {*} provider Provider for text formatter.

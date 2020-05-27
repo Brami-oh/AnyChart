@@ -777,6 +777,7 @@ goog.exportSymbol('anychart.themes.defaultTheme', {
     'lineHeight': 'normal',
     'textIndent': 0,
     'textShadow': 'none',
+    'maxLength': null,
     'vAlign': 'top',
     'hAlign': 'start',
     'wordWrap': 'normal',

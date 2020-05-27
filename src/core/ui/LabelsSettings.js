@@ -480,7 +480,7 @@ anychart.core.ui.LabelsSettings.prototype.applyInternalTextFormatters = function
   var conf = this.flatten();
   var maxLength = conf['maxLength'];
   if (goog.isDef(maxLength)) {
-    text = anychart.core.ui.InternalLabelsFormatters.getLengthFormatter(text, maxLength);
+    text = anychart.core.ui.InternalLabelsFormatters.textLengthFormatter(text, maxLength);
   }
   return text;
 };

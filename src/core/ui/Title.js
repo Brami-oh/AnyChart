@@ -4,6 +4,7 @@ goog.require('anychart.core.IStandaloneBackend');
 goog.require('anychart.core.VisualBase');
 goog.require('anychart.core.settings');
 goog.require('anychart.core.ui.Background');
+goog.require('anychart.core.ui.InternalLabelsFormatters');
 goog.require('anychart.core.utils.Margin');
 goog.require('anychart.core.utils.Padding');
 goog.require('anychart.enums');
@@ -196,13 +197,15 @@ anychart.core.ui.Title = function() {
       anychart.ConsistencyState.APPEARANCE,
       anychart.Signal.NEEDS_REDRAW | anychart.Signal.BOUNDS_CHANGED,
       anychart.Signal.NEEDS_REDRAW);
+
   anychart.core.settings.createDescriptorsMeta(this.descriptorsMeta, [
     ['width', anychart.ConsistencyState.BOUNDS],
     ['height', anychart.ConsistencyState.BOUNDS],
     ['align', anychart.ConsistencyState.BOUNDS],
     ['orientation', anychart.ConsistencyState.BOUNDS],
     ['rotation', anychart.ConsistencyState.BOUNDS],
-    ['text', anychart.ConsistencyState.APPEARANCE | anychart.ConsistencyState.BOUNDS]
+    ['text', anychart.ConsistencyState.APPEARANCE | anychart.ConsistencyState.BOUNDS],
+    ['maxLength', anychart.ConsistencyState.APPEARANCE | anychart.ConsistencyState.BOUNDS]
   ]);
 };
 goog.inherits(anychart.core.ui.Title, anychart.core.VisualBase);
@@ -806,9 +809,12 @@ anychart.core.ui.Title.prototype.applyTextSettings = function(isInitial) {
   var textVal = this.getOption('text');
   var autoText = /** @type {string} */ (this.autoText());
   var useHtml = this.getOption('useHtml');
+  var maxLength = /** @type {number|null}*/(this.getOption('maxLength'));
 
   if (isInitial || goog.isDef(textVal) || goog.isDef(autoText) || goog.isDef(useHtml)) {
     var text = /** @type {string} */ (!textVal && goog.isDef(autoText) ? autoText : textVal);
+
+    text = anychart.core.ui.InternalLabelsFormatters.textLengthFormatter(text, maxLength);
     if (useHtml) {
       this.text_.htmlText(text);
     } else {
